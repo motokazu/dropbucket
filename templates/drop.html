@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Drop Relax</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Motokazu Nishimura">
+	<!-- Date: 2010-06-16 -->
+	<script src="/dropcouch/_design/dropcouch/lib/jquery-1.4.2.min.js"></script>
+	<script src="/dropcouch/_design/dropcouch/lib/jquery.json-2.2.min.js"></script>
+<script>
+var dropbox;
+function init(){
+	dropbox = document.getElementById("dropbox");
+	dropbox.addEventListener("dragenter", dragenter, true);
+	dropbox.addEventListener("dragleave", dragleave, true);
+	dropbox.addEventListener("dragover", dragover, true);
+	dropbox.addEventListener("drop", drop, true);
+}
+function dragenter(e){
+	dropbox.setAttribute("dragenter",true);
+}
+function dragleave(e){
+	dropbox.removeAttribute("dragenter");
+}
+function dragover(e){
+	e.preventDefault();
+}
+function drop(e){
+	var dt = e.dataTransfer;
+	var files = dt.files;
+	e.preventDefault();
+
+	//alert("dropped "+files.length+" files.");
+	for(var i = 0;i < files.length ; i++){
+		var file = files[i];
+		handleFile(file);
+	}
+}
+function handleFile(file){
+	var fname = document.getElementById("filename");
+	var urn = document.getElementById("fileurn");
+	var type = document.getElementById("filetype");
+	var datatext = document.getElementById("filedata");
+	var tags = document.getElementById("filetags");
+
+	var tag = '';
+	tag = prompt("Please input tags ["+file.name+"]:","");
+	tags.textContent = tag;
+	
+	//alert("type = "+file.type);
+	type.textContent = file.type;
+	fname.textContent = file.name;
+	urn.textContent = file.urn;
+	var reader = new FileReader();
+	reader.onloadend = function(){
+		var result = reader.result;
+		var base64str = result.slice(result.indexOf("base64,")+7);
+		datatext.textContent = base64str;
+		post(file.name,file.type,base64str,tag);
+	}
+	reader.readAsDataURL(file);
+}
+
+window.addEventListener("load", init, true);
+
+function post(name, type, data, tags){
+	var json = {
+		"tags" : tags,
+		"_attachments": {}
+	};
+	json['_attachments'][name] = {
+		"content_type" : type,
+		"data" : data
+	};
+	//json['_attachments'][name] = {
+	//	"content_type":"text¥/plain",
+	//	"data": "VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ="
+	//};
+	$.ajax({
+		type: 'POST',
+		url: '/dropcouch/',
+		dataType: 'json',
+		contentType: 'application/json',
+		data: $.toJSON(json),
+		processData: false,		
+		success: function(data, dataType){
+			alert("Success!");
+		},
+		error: function(msg){
+			alert("Failed.");
+		}
+	});
+}
+</script>
+<style type="text/css">
+#dropbox {
+	font-family:monospace;
+	font-style:bold;
+	border:3px solid;
+	width:300px;
+	height:300px;
+	text-align:center;
+}
+#dropbox[dragenter="true"]{
+	background-color: #ff9;
+}
+#filedata {
+	width:800px;
+	word-wrap: break-word;
+	font-size:8px;
+}
+</style>
+</head>
+<body>
+<p id="dropbox">drop here.</p>
+<table border="1" width="500">
+	<tr><td>FIleName:</td><td><p id="filename"></p></td></tr>
+	<tr><td>URN:</td><td><p id="fileurn"></p></td></tr>
+	<tr><td>Type:</td><td><p id="filetype"></p></td></tr>
+	<tr><td>Tags:</td><td><p id="filetags"></p></td></tr>
+	<tr><td>Data:</td><td><p id="filedata">Base64-formated Data</p></td></tr>
+</table>
+</body>
+</html>

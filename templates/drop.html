@@ -8,8 +8,8 @@
 	<meta name="generator" content="TextMate http://macromates.com/">
 	<meta name="author" content="Motokazu Nishimura">
 	<!-- Date: 2010-06-16 -->
-	<script src="/dropcouch/_design/dropcouch/lib/jquery-1.4.2.min.js"></script>
-	<script src="/dropcouch/_design/dropcouch/lib/jquery.json-2.2.min.js"></script>
+	<script src="/dropbucket/_design/dropbucket/lib/jquery-1.4.2.min.js"></script>
+	<script src="/dropbucket/_design/dropbucket/lib/jquery.json-2.2.min.js"></script>
 <script>
 var dropbox;
 function init(){
@@ -40,28 +40,33 @@ function drop(e){
 	}
 }
 function handleFile(file){
-	var fname = document.getElementById("filename");
-	var urn = document.getElementById("fileurn");
-	var type = document.getElementById("filetype");
-	var datatext = document.getElementById("filedata");
-	var tags = document.getElementById("filetags");
-
 	var tag = '';
 	tag = prompt("Please input tags ["+file.name+"]:","");
-	tags.textContent = tag;
-	
-	//alert("type = "+file.type);
-	type.textContent = file.type;
-	fname.textContent = file.name;
-	urn.textContent = file.urn;
+
 	var reader = new FileReader();
 	reader.onloadend = function(){
 		var result = reader.result;
 		var base64str = result.slice(result.indexOf("base64,")+7);
-		datatext.textContent = base64str;
 		post(file.name,file.type,base64str,tag);
+
+		// debug print
+		printdata(file.name,file.urn,file.type,tag,base64str);
 	}
 	reader.readAsDataURL(file);
+}
+
+function printdata(name,urn,type,tags,data){
+	var f_name = document.getElementById("filename");
+	var f_urn = document.getElementById("fileurn");
+	var f_type = document.getElementById("filetype");
+	var f_datatext = document.getElementById("filedata");
+	var f_tags = document.getElementById("filetags");
+
+	f_type.textContent	= type;
+	f_name.textContent	= name;
+	f_urn.textContent	= urn;
+	f_tags.textContent	= tags;
+	f_datatext.textContent	= data;
 }
 
 window.addEventListener("load", init, true);
@@ -81,7 +86,7 @@ function post(name, type, data, tags){
 	//};
 	$.ajax({
 		type: 'POST',
-		url: '/dropcouch/',
+		url: '/dropbucket/',
 		dataType: 'json',
 		contentType: 'application/json',
 		data: $.toJSON(json),
@@ -99,9 +104,9 @@ function post(name, type, data, tags){
 #dropbox {
 	font-family:monospace;
 	font-style:bold;
-	border:3px solid;
-	width:300px;
-	height:300px;
+	border:1px solid;
+	width:1000px;
+	height:600px;
 	text-align:center;
 }
 #dropbox[dragenter="true"]{

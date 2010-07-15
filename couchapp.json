@@ -1,4 +1,4 @@
 {
-    "name": "Name of your CouchApp",
-    "description": "CouchApp"
+    "name": "dropbucket",
+    "description": "dropbucket is interface to post object easily to CouchDB."
 }

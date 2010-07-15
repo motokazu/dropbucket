@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>album</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Motokazu Nishimura">
+	<!-- Date: 2010-06-23 -->
+	<script src="/dropbucket/_design/dropbucket/lib/jquery-1.4.2.min.js"></script>
+	<script src="/dropbucket/_design/dropbucket/lib/jquery.json-2.2.min.js"></script>
+	<script>
+function init(){
+	$.ajax({
+		type: 'GET',
+		url: '/dropbucket/_all_docs',
+		dataType: 'json',
+		success: function(data, dataType){
+			alert($.toJSON(data));
+			if(data.total_rows > 0){
+				$.each(data.rows, function())
+			}
+			$.each(data.rows,function(index,obj){
+				alert($.toJSON(obj));
+			});
+		},
+		error: function(msg){
+			alert("Failed.");
+		}
+	});
+}
+window.addEventListener("load", init, true);
+	</script>
+</head>
+<body>
+
+
+</body>
+</html>

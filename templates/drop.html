@@ -4,12 +4,12 @@
 <html lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Drop Relax</title>
+	<title>Drop Bucket</title>
 	<meta name="generator" content="TextMate http://macromates.com/">
 	<meta name="author" content="Motokazu Nishimura">
 	<!-- Date: 2010-06-16 -->
-	<script src="/dropbucket/_design/dropbucket/lib/jquery-1.4.2.min.js"></script>
-	<script src="/dropbucket/_design/dropbucket/lib/jquery.json-2.2.min.js"></script>
+	<script src="{{ assets }}script/jquery-1.4.2.min.js"></script>
+	<script src="{{ assets }}script/jquery.json-2.2.min.js"></script>
 <script>
 var dropbox;
 function init(){
@@ -48,25 +48,8 @@ function handleFile(file){
 		var result = reader.result;
 		var base64str = result.slice(result.indexOf("base64,")+7);
 		post(file.name,file.type,base64str,tag);
-
-		// debug print
-		printdata(file.name,file.urn,file.type,tag,base64str);
 	}
 	reader.readAsDataURL(file);
-}
-
-function printdata(name,urn,type,tags,data){
-	var f_name = document.getElementById("filename");
-	var f_urn = document.getElementById("fileurn");
-	var f_type = document.getElementById("filetype");
-	var f_datatext = document.getElementById("filedata");
-	var f_tags = document.getElementById("filetags");
-
-	f_type.textContent	= type;
-	f_name.textContent	= name;
-	f_urn.textContent	= urn;
-	f_tags.textContent	= tags;
-	f_datatext.textContent	= data;
 }
 
 window.addEventListener("load", init, true);
@@ -76,14 +59,12 @@ function post(name, type, data, tags){
 		"tags" : tags,
 		"_attachments": {}
 	};
+	var t = new Date();
+	json.ctime = t.toString();
 	json['_attachments'][name] = {
 		"content_type" : type,
 		"data" : data
 	};
-	//json['_attachments'][name] = {
-	//	"content_type":"text¥/plain",
-	//	"data": "VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ="
-	//};
 	$.ajax({
 		type: 'POST',
 		url: '/dropbucket/',
@@ -108,6 +89,8 @@ function post(name, type, data, tags){
 	width:1000px;
 	height:600px;
 	text-align:center;
+	clear:both;
+	float:left;
 }
 #dropbox[dragenter="true"]{
 	background-color: #ff9;
@@ -120,13 +103,9 @@ function post(name, type, data, tags){
 </style>
 </head>
 <body>
-<p id="dropbox">drop here.</p>
-<table border="1" width="500">
-	<tr><td>FIleName:</td><td><p id="filename"></p></td></tr>
-	<tr><td>URN:</td><td><p id="fileurn"></p></td></tr>
-	<tr><td>Type:</td><td><p id="filetype"></p></td></tr>
-	<tr><td>Tags:</td><td><p id="filetags"></p></td></tr>
-	<tr><td>Data:</td><td><p id="filedata">Base64-formated Data</p></td></tr>
-</table>
+<a href="{{ assets }}index.html">index</a> &lt; <a href="{{ assets }}_show/album">Album</a>
+<hr size="1">
+<div id="dropbox">drop here.</div>
+<div id="profile">Name is Motokazu</div>
 </body>
 </html>

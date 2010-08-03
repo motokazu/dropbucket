@@ -1,5 +1,9 @@
 function(doc, req){
-	// !json templates.drop
-	// !code vendor/couchapp/template.js
-	return template(templates.drop,{});
+	// !code lib/mustache.js
+	var ddoc = this;
+	
+	return Mustache.to_html(ddoc.templates.drop, {
+		doc: doc,
+		assets: "/dropbucket/_design/dropbucket/"
+	});
 }

@@ -10,6 +10,8 @@
 	<!-- Date: 2010-06-16 -->
 	<script src="{{ assets }}script/jquery-1.4.2.min.js"></script>
 	<script src="{{ assets }}script/jquery.json-2.2.min.js"></script>
+	<script src="{{ assets }}script/jquery-ui-1.8.2.custom.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="{{ assets }}style/smoothness/jquery-ui-1.8.2.custom.css"></link>
 <script>
 var dropbox;
 function init(){
@@ -39,28 +41,28 @@ function drop(e){
 		handleFile(file);
 	}
 }
+// handled data
+var base64str = '';
+var handledfile = null;
 function handleFile(file){
-	var tag = '';
-	tag = prompt("Please input tags ["+file.name+"]:","");
-
 	var reader = new FileReader();
 	reader.onloadend = function(){
 		var result = reader.result;
-		var base64str = result.slice(result.indexOf("base64,")+7);
-		post(file.name,file.type,base64str,tag);
+		base64str = result.slice(result.indexOf("base64,")+7);
+		handledfile = file;
+		$('#dropdialog').dialog('open');
 	}
 	reader.readAsDataURL(file);
 }
 
 window.addEventListener("load", init, true);
 
-function post(name, type, data, tags){
+function post(name, type, data, tags, ctime){
 	var json = {
 		"tags" : tags,
 		"_attachments": {}
 	};
-	var t = new Date();
-	json.ctime = t.toString();
+	json.ctime = ctime;
 	json['_attachments'][name] = {
 		"content_type" : type,
 		"data" : data
@@ -73,13 +75,62 @@ function post(name, type, data, tags){
 		data: $.toJSON(json),
 		processData: false,		
 		success: function(data, dataType){
-			alert("Success!");
+			$('#post-filename').text(name);
+			$('#dropdialog').dialog('close');
+			$('#post-success-message').dialog('open');
 		},
 		error: function(msg){
 			alert("Failed.");
 		}
 	});
 }
+$(function(){
+	$('#create_at_datepicker').datepicker({
+		showButtonPanel: true,
+		dateFormat: "yy/mm/dd",
+		currentText: 'Today'
+	});
+	// dialog
+	$('#dropdialog').dialog({
+		autoOpen: false,
+		height: 330,
+		width: 550,
+		modal: true,
+		buttons:{
+			'OK':function(){
+				var tag = $('#tags').val();
+				var ctime = $('#create_at_datepicker').val();
+				var t = new Date();
+				if ( ctime ) {
+					t.setTime(Date.parse(ctime));
+				}
+				ctime = t.toString();
+				post(handledfile.name,handledfile.type,base64str,tag,ctime);
+			},
+			'Clear':function(){
+				$('#tags').val('');
+				$('#create_at_datepicker').val('');
+			},
+			'Cancel':function(){
+				$(this).dialog('close');
+			}
+		},
+		close:function(){
+			$('#tags').val('');
+			$('#create_at_datepicker').val('');
+		}
+	});
+	// message dialog
+	$('#post-success-message').dialog({
+		autoOpen: false,
+		modal: true,
+		buttons:{
+			OK: function(){
+				$(this).dialog('close');
+			}
+		}
+	});
+});
 </script>
 <style type="text/css">
 #dropbox {
@@ -100,12 +151,33 @@ function post(name, type, data, tags){
 	word-wrap: break-word;
 	font-size:8px;
 }
+fieldset {
+	padding:0;
+	border:0;
+	margin-top:25px;
+}
+label, input { display:block; }
+input.text { margin-bottom:12px; width:95%; padding: .4em; }
 </style>
 </head>
 <body>
 <a href="{{ assets }}index.html">index</a> &lt; <a href="{{ assets }}_show/album">Album</a>
 <hr size="1">
 <div id="dropbox">drop here.</div>
-<div id="profile">Name is Motokazu</div>
+
+<!-- dialog -->
+<div id="dropdialog" title="Confirm your drop.">
+	<form>
+		<fieldset>
+			<label for="tags">Tags</label>
+			<input type="text" name="tags" id="tags" class="text ui-widget-content ui-corner-all"/>
+			<label for="create_at">Create at (default Today)</label>
+			<input type="text" name="create_at" id="create_at_datepicker" class="text ui-widget-content ui-corner-all" />
+		</fieldset>
+	</form>
+</div>
+<div id="post-success-message" title="Successfully Dropped">
+	<p><span id="post-filename">Post filename</span> is successfully dropped!</p>
+</div>
 </body>
 </html>
